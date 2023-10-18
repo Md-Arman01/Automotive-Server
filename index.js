@@ -14,7 +14,6 @@ app.use(express.json())
 // connect to mongodb clusterO
 
 const uri = `mongodb+srv://${process.env.BRAND_NAME}:${process.env.PROJECT_PASSWORD}@cluster0.kplqqe8.mongodb.net/?retryWrites=true&w=majority`;
-
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -27,7 +26,14 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
 
-
+    // brand collection
+    const brandCollections = client.db("brandDB").collection("brands")
+    app.get('/brands', async(req, res)=> {
+      const cursor = brandCollections.find();
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+    // -----
 
 
 
