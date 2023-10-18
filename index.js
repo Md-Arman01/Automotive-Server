@@ -25,7 +25,6 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-
     // brand collection
     const brandCollections = client.db("brandDB").collection("brands")
     app.get('/brands', async(req, res)=> {
@@ -34,6 +33,14 @@ async function run() {
       res.send(result)
     })
     // -----
+    const productsCollection = client.db("productsDB").collection("products")
+
+    app.post('/products', async(req, res) => {
+      const addProduct = req.body;
+      const result = await productsCollection.insertOne(addProduct)
+      res.send(result)
+    })
+
 
 
 
