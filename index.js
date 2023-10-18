@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
@@ -27,13 +27,22 @@ async function run() {
   try {
     // brand collection
     const brandCollections = client.db("brandDB").collection("brands")
+    const productsCollection = client.db("productsDB").collection("products")
+
+
     app.get('/brands', async(req, res)=> {
       const cursor = brandCollections.find();
       const result = await cursor.toArray()
       res.send(result)
     })
     // -----
-    const productsCollection = client.db("productsDB").collection("products")
+
+    app.get('/brands/:id', async(req, res)=>{
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) };
+      const result = await brandCollections.findOne(query);
+      res.send(result)
+    })
 
     app.post('/products', async(req, res) => {
       const addProduct = req.body;
