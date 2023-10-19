@@ -29,7 +29,7 @@ async function run() {
     const brandCollections = client.db("brandDB").collection("brands")
     const productsCollection = client.db("productsDB").collection("products")
 
-
+    // get
     app.get('/brands', async(req, res)=> {
       const cursor = brandCollections.find();
       const result = await cursor.toArray()
@@ -42,26 +42,39 @@ async function run() {
       const result = await brandCollections.findOne(query);
       res.send(result)
     })
-    // -----
-
-    
-    // get
     app.get('/products', async(req, res)=> {
       const cursor = productsCollection.find();
       const result = await cursor.toArray()
       res.send(result)
     })
     // -----
-
-    
-
     // post
     app.post('/products', async(req, res) => {
       const addProduct = req.body;
       const result = await productsCollection.insertOne(addProduct)
       res.send(result)
     })
+    //-----
+    // update
+    app.put('/products/:id', async(req, res)=> {
+      const product = req.body;
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) } 
+      const options = { upsert: true }
+      const updateDoc = {
+        $set: {
+          photoURL : product.photoURL,
+          name : product.name,
+          brand : product.brand,
+          type : product.type,
+          price : product.price,
+          rating : product.rating,
+        },
+      };
+      const result = await productsCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
 
+    })
 
 
     // -------
