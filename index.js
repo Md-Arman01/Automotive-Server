@@ -30,6 +30,19 @@ async function run() {
     const productsCollection = client.db("productsDB").collection("products")
     const myCartCollection = client.db("myCartDB").collection("myCart")
 
+
+      // post
+      app.post('/products', async(req, res) => {
+        const addProduct = req.body;
+        const result = await productsCollection.insertOne(addProduct)
+        res.send(result)
+      })
+      app.post('/myCart', async(req, res)=> {
+        const addProduct = req.body;
+        const result = await myCartCollection.insertOne(addProduct)
+        res.send(result)
+      })
+  
     // get
     app.get('/brands', async(req, res)=> {
       const cursor = brandCollections.find();
@@ -43,11 +56,14 @@ async function run() {
       const result = await brandCollections.findOne(query);
       res.send(result)
     })
-    app.get('/products', async(req, res)=> {
-      const cursor = productsCollection.find();
+    app.get('/products/:brand_name', async(req, res)=> {
+      const brand_name = req.params.brand_name;
+      const query = {brand: brand_name}
+      const cursor = productsCollection.find(query);
       const result = await cursor.toArray()
       res.send(result)
     })
+
     app.get('/myCart/:email', async(req, res)=> {
       const email = req.params.email;
       const query = {email: email}
@@ -56,18 +72,7 @@ async function run() {
       res.send(result)
     })
     // -----
-    // post
-    app.post('/products', async(req, res) => {
-      const addProduct = req.body;
-      const result = await productsCollection.insertOne(addProduct)
-      res.send(result)
-    })
-    app.post('/myCart', async(req, res)=> {
-      const addProduct = req.body;
-      const result = await myCartCollection.insertOne(addProduct)
-      res.send(result)
-    })
-
+  
 
     //-----
     // update
