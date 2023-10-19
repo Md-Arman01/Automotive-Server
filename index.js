@@ -35,21 +35,32 @@ async function run() {
       const result = await cursor.toArray()
       res.send(result)
     })
-    // -----
-
+    
     app.get('/brands/:id', async(req, res)=>{
       const id = req.params.id
       const query = { _id: new ObjectId(id) };
       const result = await brandCollections.findOne(query);
       res.send(result)
     })
+    // -----
 
+    
+    // get
+    app.get('/products', async(req, res)=> {
+      const cursor = productsCollection.find();
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+    // -----
+
+    
+
+    // post
     app.post('/products', async(req, res) => {
       const addProduct = req.body;
       const result = await productsCollection.insertOne(addProduct)
       res.send(result)
     })
-
 
 
 
