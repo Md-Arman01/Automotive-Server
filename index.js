@@ -56,6 +56,18 @@ async function run() {
       const result = await brandCollections.findOne(query);
       res.send(result)
     })
+    app.get('/products', async(req, res)=> {
+      const cursor = productsCollection.find();
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+    app.get('/products/:brand_name', async(req, res)=> {
+      const brand_name = req.params.brand_name;
+      const query = {brand: brand_name}
+      const cursor = productsCollection.find(query);
+      const result = await cursor.toArray()
+      res.send(result)
+    })
     app.get('/products/:brand_name', async(req, res)=> {
       const brand_name = req.params.brand_name;
       const query = {brand: brand_name}
