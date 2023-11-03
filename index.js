@@ -2,13 +2,40 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
+var jwt = require('jsonwebtoken');// jst practice 
+var cookieParser = require('cookie-parser')
 const app = express()
 const port = process.env.PORT || 5000;
 
 // middleWare
-app.use(cors())
+app.use(cors({
+  origin: ['https://automotive-brandshop.web.app', 'https://automotive-brandshop.firebaseapp.com'],
+  credentials: true
+}))
 app.use(express.json())
+app.use(cookieParser())
 // ----
+
+// custom middleware
+const verifyToken = async(req, res, next) => {
+   const token = req.cookies.token;
+   console.log('ttt token', token)
+   if(!token){
+    return res.status(401).send({message: "not authorized"})
+  }
+  jwt.verify(token, process.env.ACCESS_SECRET_TOKEN , (err, decoded)=> {
+    if(err){
+      console.log(err)
+      return res.status(401).send({message: "unAuthorized"})
+      }
+      console.log('value in the token', decoded)
+      req.user = decoded
+      next()
+  });
+
+}
+
+
 
 
 // connect to mongodb clusterO
@@ -30,6 +57,34 @@ async function run() {
     const productsCollection = client.db("productsDB").collection("products")
     const myCartCollection = client.db("myCartDB").collection("myCart")
 
+
+    //auth token api
+
+    app.post('/jwt', async(req, res)=> {
+      const user = req.body;
+      console.log(user)
+      const token = jwt.sign(user , process.env.ACCESS_SECRET_TOKEN , { expiresIn: '1h' });
+      
+      res
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none'
+      })
+      .send({success: true})
+    })
+
+    app.post('/logout', async(req, res)=> {
+      const user = req.body
+      res.clearCookie('token', {secure: true, sameSite: 'none'}).send({success: true})
+    })
+
+
+
+
+
+
+      //server api
 
       // post
       app.post('/products', async(req, res) => {
@@ -76,7 +131,12 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/myCart/:email', async(req, res)=> {
+    app.get('/myCart/:email', verifyToken,  async(req, res)=> {
+      console.log('user in the valid token' , req.user)
+      if(req.params.email !== req.user.email){
+          return res.status(403).send({message: 'forbidden access'})
+      }
+
       const email = req.params.email;
       const query = {email: email}
       const cursor = myCartCollection.find(query);
